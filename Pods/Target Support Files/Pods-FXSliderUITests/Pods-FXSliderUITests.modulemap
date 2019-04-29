@@ -1,0 +1,6 @@
+framework module Pods_FXSliderUITests {
+  umbrella header "Pods-FXSliderUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
