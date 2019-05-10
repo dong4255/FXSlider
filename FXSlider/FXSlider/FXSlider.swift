@@ -15,7 +15,7 @@ public class FXSlider: UIControl {
     private let trackLayer = CAShapeLayer()
     private let trackLayerHeight: CGFloat = 2
     /// 滑块
-    private let sliderCircleLayer = CAShapeLayer()
+    private let sliderCircleView = UIView()
     private let sliderCircleWidth: CGFloat = 25
     /// 节点数组
     private var trackCirclesArray = [CAShapeLayer]()
@@ -115,15 +115,16 @@ public class FXSlider: UIControl {
         trackLayer.strokeEnd = CGFloat(realValue)
         self.layer.addSublayer(trackLayer)
         
-        sliderCircleLayer.frame = CGRect(x: 0, y: 0, width: sliderCircleWidth, height: sliderCircleWidth)
-        sliderCircleLayer.position = CGPoint(x: 0, y: self.bounds.midY)
-        sliderCircleLayer.anchorPoint = CGPoint(x: 0, y: 0.5)
-        sliderCircleLayer.backgroundColor = UIColor.white.cgColor
-        sliderCircleLayer.cornerRadius = sliderCircleWidth / 2.0
-        sliderCircleLayer.shadowColor = UIColor.gray.cgColor
-        sliderCircleLayer.shadowOffset = CGSize(width: 1, height: 1)
-        sliderCircleLayer.shadowOpacity = 1
-        self.layer.addSublayer(sliderCircleLayer)
+        sliderCircleView.isUserInteractionEnabled = false
+        sliderCircleView.frame = CGRect(x: 0, y: 0, width: sliderCircleWidth, height: sliderCircleWidth)
+        sliderCircleView.layer.position = CGPoint(x: 0, y: self.bounds.midY)
+        sliderCircleView.layer.anchorPoint = CGPoint(x: 0, y: 0.5)
+        sliderCircleView.layer.backgroundColor = UIColor.white.cgColor
+        sliderCircleView.layer.cornerRadius = sliderCircleWidth / 2.0
+        sliderCircleView.layer.shadowColor = UIColor.gray.cgColor
+        sliderCircleView.layer.shadowOffset = CGSize(width: 1, height: 1)
+        sliderCircleView.layer.shadowOpacity = 1
+        self.addSubview(sliderCircleView)
         
     }
     
@@ -131,7 +132,7 @@ public class FXSlider: UIControl {
     override public func layoutSubviews() {
         super.layoutSubviews()
         
-        sliderCircleLayer.position.y = self.bounds.midY
+        sliderCircleView.layer.position.y = self.bounds.midY
         
         trackLayer.backgroundColor = trackColor.cgColor
         trackLayer.strokeColor = selectedTrackColor.cgColor
@@ -198,8 +199,8 @@ public class FXSlider: UIControl {
         CATransaction.begin()
         CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
         trackLayer.strokeEnd = CGFloat(realValue)
-        sliderCircleLayer.position.x = transformValue(realValue)
-        sliderCircleLayer.anchorPoint.x = CGFloat(realValue)
+        sliderCircleView.layer.position.x = transformValue(realValue)
+        sliderCircleView.layer.anchorPoint.x = CGFloat(realValue)
         CATransaction.commit()
         
         for (i ,trackCircle) in trackCirclesArray.enumerated() {
@@ -212,9 +213,9 @@ public class FXSlider: UIControl {
         if maximumValue == minimumValue { return false }
         
         startTouchPosition = touch.location(in: self)
-        startSliderPosition = sliderCircleLayer.position
+        startSliderPosition = sliderCircleView.layer.position
         
-        if sliderCircleLayer.frame.contains(startTouchPosition) {
+        if sliderCircleView.layer.frame.contains(startTouchPosition) {
             return true
         }else {
             for (i ,trackCircle) in trackCirclesArray.enumerated() {
@@ -249,7 +250,7 @@ public class FXSlider: UIControl {
     
     public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
         if let point = touch?.location(in: self) {
-            if sliderCircleLayer.frame.contains(point) {
+            if sliderCircleView.layer.frame.contains(point) {
                 self.sendActions(for: .touchUpInside)
             }else {
                 self.sendActions(for: .touchUpOutside)
