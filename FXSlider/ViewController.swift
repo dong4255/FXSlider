@@ -20,7 +20,7 @@ class ViewController: UIViewController {
         slider.selectedTrackColor = .green
         
         _ = slider.rx.value.subscribe(onNext: { (value) in
-            print("rx:\(value)")
+//            print("rx:\(value)")
         })
         
     }

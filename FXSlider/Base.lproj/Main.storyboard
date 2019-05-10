@@ -22,7 +22,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oSs-xL-cKE" customClass="FXSlider" customModule="FXSlider" customModuleProvider="target">
-                                <rect key="frame" x="20" y="433" width="374" height="30"/>
+                                <rect key="frame" x="40" y="433" width="334" height="30"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="JfW-aD-gbx"/>
@@ -33,6 +33,15 @@
                                     </userDefinedRuntimeAttribute>
                                     <userDefinedRuntimeAttribute type="color" keyPath="selectedTrackColor">
                                         <color key="value" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="minimumValue">
+                                        <real key="value" value="0.0"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="maximumValue">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="value">
+                                        <real key="value" value="0.0"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
@@ -54,8 +63,8 @@
                         <constraints>
                             <constraint firstItem="oSs-xL-cKE" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="2kW-IT-cOO"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="BAB-Q7-aGi" secondAttribute="trailing" constant="20" symbolic="YES" id="5z1-CR-4mw"/>
-                            <constraint firstItem="oSs-xL-cKE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="6gs-C8-sTt"/>
-                            <constraint firstItem="oSs-xL-cKE" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="J8N-qW-mai"/>
+                            <constraint firstItem="oSs-xL-cKE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="6gs-C8-sTt"/>
+                            <constraint firstItem="oSs-xL-cKE" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" constant="-20" id="J8N-qW-mai"/>
                             <constraint firstItem="BAB-Q7-aGi" firstAttribute="top" secondItem="oSs-xL-cKE" secondAttribute="bottom" constant="36" id="KCu-nf-X5U"/>
                             <constraint firstItem="oSs-xL-cKE" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="a1d-SC-Jmu"/>
                             <constraint firstItem="BAB-Q7-aGi" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="oDt-nI-qQs"/>

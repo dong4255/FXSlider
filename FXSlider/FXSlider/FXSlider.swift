@@ -13,43 +13,82 @@ public class FXSlider: UIControl {
     
     /// 进度条
     private let trackLayer = CAShapeLayer()
+    private let trackLayerHeight: CGFloat = 2
     /// 滑块
     private let sliderCircleLayer = CAShapeLayer()
+    private let sliderCircleWidth: CGFloat = 25
     /// 节点数组
     private var trackCirclesArray = [CAShapeLayer]()
+    private let trackCircleWidth: CGFloat = 4
     
     /// 开始点击位置
     private var startTouchPosition = CGPoint.zero
     /// 滑块开始的位置
     private var startSliderPosition = CGPoint.zero
+    /// trackLayer.strokeEnd 的真实值
+    private var realValue: Double = 0.0 {
+        didSet {
+            changeSliderPosition()
+        }
+    }
     
     /// 进度条颜色
     @IBInspectable
-    public var trackColor:UIColor = UIColor.lightGray {
-        didSet{
+    public var trackColor: UIColor = UIColor.lightGray {
+        didSet {
             self.setNeedsLayout()
         }
     }
     /// 进度条选中颜色
     @IBInspectable
-    public var selectedTrackColor:UIColor = UIColor.blue {
-        didSet{
+    public var selectedTrackColor: UIColor = UIColor.blue {
+        didSet {
             self.setNeedsLayout()
         }
     }
     /// 节点数量
     @IBInspectable
-    public var trackCirclesCount:UInt = 0 {
+    public var trackCirclesCount: UInt = 0 {
         didSet {
             self.setNeedsLayout()
         }
     }
     
-    /// 滑动的数值 0 ~ 1
+    /// 滑动的数值
     @IBInspectable
-    public var value:Double = 0.0 {
+    public var value: Double {
+        get {
+            return realValue * (maximumValue - minimumValue) + minimumValue
+        }
+        set {
+            let value = min(max(minimumValue, newValue), maximumValue)
+            if maximumValue == minimumValue {
+                realValue = 0
+            }else {
+                realValue = (value - minimumValue) / (maximumValue - minimumValue)
+            }
+        }
+    }
+    
+    /// 最小值
+    @IBInspectable
+    public var minimumValue: Double = 0.0 {
         didSet {
-            changeSliderPosition()
+            if minimumValue > maximumValue {
+                maximumValue = minimumValue
+            }
+            if minimumValue > value {
+                value = minimumValue
+            }
+        }
+    }
+    /// 最大值
+    @IBInspectable
+    public var maximumValue: Double = 1.0 {
+        didSet {
+            if maximumValue < minimumValue {
+                minimumValue = maximumValue
+            }
         }
     }
     
@@ -73,20 +112,21 @@ public class FXSlider: UIControl {
         
         trackLayer.fillColor = UIColor.clear.cgColor
         trackLayer.lineWidth = 2
-        trackLayer.strokeEnd = 0
+        trackLayer.strokeEnd = CGFloat(realValue)
         self.layer.addSublayer(trackLayer)
         
-        sliderCircleLayer.frame = CGRect(x: 0, y: 0, width: 25, height: 25)
-        sliderCircleLayer.position = CGPoint(x: 10.5, y: self.bounds.midY)
+        sliderCircleLayer.frame = CGRect(x: 0, y: 0, width: sliderCircleWidth, height: sliderCircleWidth)
+        sliderCircleLayer.position = CGPoint(x: 0, y: self.bounds.midY)
+        sliderCircleLayer.anchorPoint = CGPoint(x: 0, y: 0.5)
         sliderCircleLayer.backgroundColor = UIColor.white.cgColor
-        sliderCircleLayer.cornerRadius = 12.5
+        sliderCircleLayer.cornerRadius = sliderCircleWidth / 2.0
         sliderCircleLayer.shadowColor = UIColor.gray.cgColor
         sliderCircleLayer.shadowOffset = CGSize(width: 1, height: 1)
         sliderCircleLayer.shadowOpacity = 1
         self.layer.addSublayer(sliderCircleLayer)
         
     }
-        
+    
     // MARK: 设置子视图约束
     override public func layoutSubviews() {
         super.layoutSubviews()
@@ -96,29 +136,30 @@ public class FXSlider: UIControl {
         trackLayer.backgroundColor = trackColor.cgColor
         trackLayer.strokeColor = selectedTrackColor.cgColor
         
-        trackLayer.frame = CGRect(x: 0, y: 0, width: self.bounds.width, height: 2)
+        let trackLayerWidth = trackCirclesCount > 1 ? (self.bounds.width - trackCircleWidth) : self.bounds.width
+        trackLayer.frame = CGRect(x: 0, y: 0, width: trackLayerWidth, height: trackLayerHeight)
         trackLayer.position = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
         let path = UIBezierPath.init()
         path.move(to: CGPoint(x: 0, y: 1))
-        path.addLine(to: CGPoint(x: self.bounds.width, y: 1))
+        path.addLine(to: CGPoint(x: trackLayerWidth, y: 1))
         trackLayer.path = path.cgPath
-        
+        trackLayer.strokeEnd = CGFloat(realValue)
         
         if trackCirclesCount > 1 {
-            let stepWidth = self.bounds.width / CGFloat(trackCirclesCount - 1)
+            let stepWidth = trackLayer.bounds.width / CGFloat(trackCirclesCount - 1)
             for i in 0..<trackCirclesCount {
                 let trackCircle: CAShapeLayer
                 if i < trackCirclesArray.count {
                     trackCircle = trackCirclesArray[Int(i)]
                 }else {
                     trackCircle = CAShapeLayer()
-                    trackCircle.frame = CGRect(x: 0, y: 0, width: 4, height: 4)
-                    trackCircle.cornerRadius = 2
+                    trackCircle.frame = CGRect(x: 0, y: 0, width: trackCircleWidth, height: trackCircleWidth)
+                    trackCircle.cornerRadius = trackCircleWidth / 2.0
                     trackCircle.backgroundColor = trackColor.cgColor
-                    self.layer.insertSublayer(trackCircle, above: trackLayer)
+                    trackLayer.addSublayer(trackCircle)
                     trackCirclesArray.append(trackCircle)
                 }
-                trackCircle.position = CGPoint(x: stepWidth * CGFloat(i), y: self.bounds.midY)
+                trackCircle.position = CGPoint(x: stepWidth * CGFloat(i), y: trackLayer.bounds.midY)
             }
         }
         
@@ -128,10 +169,10 @@ public class FXSlider: UIControl {
     // MARK: - Event
     // MARK: 转换PositionX 为 Value
     private func transformPositionX(_ positionX:CGFloat) -> Double {
-        if positionX <= 10.5 {
+        if positionX <= 0 {
             return 0
         }
-        if positionX >= self.bounds.width - 10.5 {
+        if positionX >= self.bounds.width {
             return 1
         }
         return Double(positionX / self.bounds.width)
@@ -139,30 +180,37 @@ public class FXSlider: UIControl {
     
     // MARK: 转换Value 为 PositionX
     private func transformValue(_ value:Double) -> CGFloat {
+        let minX = CGFloat(0)
+        let maxX = self.bounds.width
         if value <= 0 {
-            return 10.5
+            return minX
         }
         if value >= 1 {
-            return self.bounds.width - 10.5
+            return maxX
         }
-        return CGFloat(value) * self.bounds.width
+        var x = CGFloat(value) * self.bounds.width
+        x = min(max(x, minX), maxX)
+        return x
     }
     
     // MARK: 改变滑块位置
     private func changeSliderPosition() {
         CATransaction.begin()
         CATransaction.setValue(kCFBooleanTrue, forKey: kCATransactionDisableActions)
-        trackLayer.strokeEnd = CGFloat(value)
-        sliderCircleLayer.position.x = transformValue(value)
+        trackLayer.strokeEnd = CGFloat(realValue)
+        sliderCircleLayer.position.x = transformValue(realValue)
+        sliderCircleLayer.anchorPoint.x = CGFloat(realValue)
         CATransaction.commit()
         
         for (i ,trackCircle) in trackCirclesArray.enumerated() {
-            trackCircle.backgroundColor = value >= Double(i)/Double(trackCirclesArray.count - 1) ? selectedTrackColor.cgColor : trackColor.cgColor
+            trackCircle.backgroundColor = realValue >= Double(i)/Double(trackCirclesArray.count - 1) ? selectedTrackColor.cgColor : trackColor.cgColor
         }
     }
     
     // MARK: - Touchs
     override public func beginTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
+        if maximumValue == minimumValue { return false }
+        
         startTouchPosition = touch.location(in: self)
         startSliderPosition = sliderCircleLayer.position
         
@@ -170,12 +218,12 @@ public class FXSlider: UIControl {
             return true
         }else {
             for (i ,trackCircle) in trackCirclesArray.enumerated() {
-                let rect = CGRect(x: trackCircle.frame.origin.x - 10.5 ,
-                                  y: trackCircle.frame.origin.y - 10.5,
-                                  width: trackCircle.frame.size.width + 21,
-                                  height: trackCircle.frame.size.height + 21)
+                let rect = CGRect(x: trackCircle.frame.origin.x - ((sliderCircleWidth / 2.0) - (trackCircleWidth / 2.0)) ,
+                                  y: trackCircle.frame.origin.y - ((sliderCircleWidth / 2.0) - (trackCircleWidth / 2.0)),
+                                  width: trackCircle.frame.size.width + (sliderCircleWidth - trackCircleWidth),
+                                  height: trackCircle.frame.size.height + ((sliderCircleWidth - trackCircleWidth)))
                 if rect.contains(startTouchPosition) {
-                    self.value = Double(i)/Double(trackCirclesArray.count - 1)
+                    self.realValue = Double(i)/Double(trackCirclesArray.count - 1)
                     self.sendActions(for: .valueChanged)
                     return false
                 }
@@ -186,13 +234,33 @@ public class FXSlider: UIControl {
     }
     
     override public func continueTracking(_ touch: UITouch, with event: UIEvent?) -> Bool {
+        if maximumValue == minimumValue { return false }
+        
         let positionX = startSliderPosition.x - (startTouchPosition.x - touch.location(in: self).x)
-        let limitPositionX = min(max(10.5, positionX), self.bounds.width - 10.5)
+        let limitPositionX = min(max(0, positionX), self.bounds.width)
         
         let value = transformPositionX(limitPositionX)
-        self.value = value
-        self.sendActions(for: .valueChanged)
+        if self.realValue != value {
+            self.realValue = value
+            self.sendActions(for: .valueChanged)
+        }
         return true
+    }
+    
+    public override func endTracking(_ touch: UITouch?, with event: UIEvent?) {
+        if let point = touch?.location(in: self) {
+            if sliderCircleLayer.frame.contains(point) {
+                self.sendActions(for: .touchUpInside)
+            }else {
+                self.sendActions(for: .touchUpOutside)
+            }
+        }else {
+            self.sendActions(for: .touchCancel)
+        }
+    }
+    
+    public override func cancelTracking(with event: UIEvent?) {
+        self.sendActions(for: .touchCancel)
     }
     
 }
