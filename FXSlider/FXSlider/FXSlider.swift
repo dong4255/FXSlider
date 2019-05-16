@@ -11,6 +11,14 @@ import UIKit
 @IBDesignable
 public class FXSlider: UIControl {
     
+    /// 缓冲进度条
+    private let bufferTrackLayer = CAShapeLayer()
+    private var bufferRealValue: Double = 0.0 {
+        didSet {
+            bufferTrackLayer.strokeEnd = CGFloat(bufferRealValue)
+        }
+    }
+    
     /// 进度条
     private let trackLayer = CAShapeLayer()
     private let trackLayerHeight: CGFloat = 2
@@ -32,9 +40,19 @@ public class FXSlider: UIControl {
         }
     }
     
+/********************************************************************/
+    
+    /// 缓冲进度条颜色
+    @IBInspectable
+    public var bufferTrackColor: UIColor = UIColor.lightGray {
+        didSet{
+            self.setNeedsLayout()
+        }
+    }
+    
     /// 进度条颜色
     @IBInspectable
-    public var trackColor: UIColor = UIColor.lightGray {
+    public var trackColor: UIColor = UIColor.lightGray.withAlphaComponent(0.5) {
         didSet {
             self.setNeedsLayout()
         }
@@ -51,6 +69,22 @@ public class FXSlider: UIControl {
     public var trackCirclesCount: UInt = 0 {
         didSet {
             self.setNeedsLayout()
+        }
+    }
+    
+    /// 缓冲进度数值
+    @IBInspectable
+    public var bufferValue: Double {
+        get {
+            return bufferRealValue * (maximumValue - minimumValue) + minimumValue
+        }
+        set {
+            let value = min(max(minimumValue, newValue), maximumValue)
+            if maximumValue == minimumValue {
+                bufferRealValue = 0
+            }else {
+                bufferRealValue = (value - minimumValue) / (maximumValue - minimumValue)
+            }
         }
     }
     
@@ -110,8 +144,13 @@ public class FXSlider: UIControl {
     /// 创建子视图
     private func createSublayers() {
         
+        bufferTrackLayer.fillColor = UIColor.clear.cgColor
+        bufferTrackLayer.lineWidth = trackLayerHeight
+        bufferTrackLayer.strokeEnd = CGFloat(realValue)
+        self.layer.addSublayer(bufferTrackLayer)
+        
         trackLayer.fillColor = UIColor.clear.cgColor
-        trackLayer.lineWidth = 2
+        trackLayer.lineWidth = trackLayerHeight
         trackLayer.strokeEnd = CGFloat(realValue)
         self.layer.addSublayer(trackLayer)
         
@@ -134,7 +173,7 @@ public class FXSlider: UIControl {
         
         sliderCircleView.layer.position.y = self.bounds.midY
         
-        trackLayer.backgroundColor = trackColor.cgColor
+        trackLayer.backgroundColor = UIColor.clear.cgColor
         trackLayer.strokeColor = selectedTrackColor.cgColor
         
         let trackLayerWidth = trackCirclesCount > 1 ? (self.bounds.width - trackCircleWidth) : self.bounds.width
@@ -145,6 +184,13 @@ public class FXSlider: UIControl {
         path.addLine(to: CGPoint(x: trackLayerWidth, y: 1))
         trackLayer.path = path.cgPath
         trackLayer.strokeEnd = CGFloat(realValue)
+        
+        bufferTrackLayer.backgroundColor = trackColor.cgColor
+        bufferTrackLayer.strokeColor = bufferTrackColor.cgColor
+        bufferTrackLayer.frame = trackLayer.frame
+        bufferTrackLayer.position = trackLayer.position
+        bufferTrackLayer.path = path.cgPath
+        bufferTrackLayer.strokeEnd = CGFloat(bufferRealValue)
         
         if trackCirclesCount > 1 {
             let stepWidth = trackLayer.bounds.width / CGFloat(trackCirclesCount - 1)
