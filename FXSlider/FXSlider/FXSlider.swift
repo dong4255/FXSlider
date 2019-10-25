@@ -9,7 +9,7 @@
 import UIKit
 
 @IBDesignable
-public class FXSlider: UIControl {
+open class FXSlider: UIControl {
     
     /// 缓冲进度条
     private let bufferTrackLayer = CAShapeLayer()
@@ -23,8 +23,8 @@ public class FXSlider: UIControl {
     private let trackLayer = CAShapeLayer()
     private let trackLayerHeight: CGFloat = 2
     /// 滑块
-    private let sliderCircleView = UIView()
-    private let sliderCircleWidth: CGFloat = 25
+    private let sliderCircleView = UIImageView()
+    
     /// 节点数组
     private var trackCirclesArray = [CAShapeLayer]()
     private let trackCircleWidth: CGFloat = 4
@@ -42,9 +42,37 @@ public class FXSlider: UIControl {
     
 /********************************************************************/
     
+    /// 滑块大小
+    @IBInspectable
+    open var sliderCircleSize: CGFloat = 20 {
+        didSet {
+            self.setNeedsLayout()
+        }
+    }
+    
+    /// 滑块颜色
+    @IBInspectable
+    open var sliderCircleColor = UIColor.white {
+        didSet {
+            sliderCircleView.backgroundColor = sliderCircleColor
+        }
+    }
+    
+    /// 滑块图片
+    @IBInspectable
+    open var sliderCircleImage: UIImage? {
+        didSet {
+            if sliderCircleImage != nil {
+                sliderCircleView.backgroundColor = nil
+                sliderCircleView.layer.cornerRadius = 0
+            }
+            sliderCircleView.image = sliderCircleImage?.withRenderingMode(.alwaysOriginal)
+        }
+    }
+    
     /// 缓冲进度条颜色
     @IBInspectable
-    public var bufferTrackColor: UIColor = UIColor.lightGray {
+    open var bufferTrackColor: UIColor = UIColor.lightGray {
         didSet{
             self.setNeedsLayout()
         }
@@ -52,29 +80,29 @@ public class FXSlider: UIControl {
     
     /// 进度条颜色
     @IBInspectable
-    public var trackColor: UIColor = UIColor.lightGray.withAlphaComponent(0.5) {
+    open var trackColor: UIColor = UIColor.lightGray.withAlphaComponent(0.5) {
         didSet {
             self.setNeedsLayout()
         }
     }
     /// 进度条选中颜色
     @IBInspectable
-    public var selectedTrackColor: UIColor = UIColor.blue {
+    open var selectedTrackColor: UIColor = UIColor.blue {
         didSet {
             self.setNeedsLayout()
         }
     }
     /// 节点数量
     @IBInspectable
-    public var trackCirclesCount: UInt = 0 {
+    open var trackCirclesCount: UInt = 0 {
         didSet {
             self.setNeedsLayout()
         }
     }
     
-    /// 缓冲进度数值
+    /// 缓冲进度数值 （最小值和最大值之间，非百分比）
     @IBInspectable
-    public var bufferValue: Double {
+    open var bufferValue: Double {
         get {
             return bufferRealValue * (maximumValue - minimumValue) + minimumValue
         }
@@ -88,9 +116,9 @@ public class FXSlider: UIControl {
         }
     }
     
-    /// 滑动的数值
+    /// 滑动的数值 （最小值和最大值之间，非百分比）
     @IBInspectable
-    public var value: Double {
+    open var value: Double {
         get {
             return realValue * (maximumValue - minimumValue) + minimumValue
         }
@@ -106,7 +134,7 @@ public class FXSlider: UIControl {
     
     /// 最小值
     @IBInspectable
-    public var minimumValue: Double = 0.0 {
+    open var minimumValue: Double = 0.0 {
         didSet {
             if minimumValue > maximumValue {
                 maximumValue = minimumValue
@@ -118,7 +146,7 @@ public class FXSlider: UIControl {
     }
     /// 最大值
     @IBInspectable
-    public var maximumValue: Double = 1.0 {
+    open var maximumValue: Double = 1.0 {
         didSet {
             if maximumValue < minimumValue {
                 minimumValue = maximumValue
@@ -155,11 +183,13 @@ public class FXSlider: UIControl {
         self.layer.addSublayer(trackLayer)
         
         sliderCircleView.isUserInteractionEnabled = false
-        sliderCircleView.frame = CGRect(x: 0, y: 0, width: sliderCircleWidth, height: sliderCircleWidth)
+        sliderCircleView.frame = CGRect(x: 0, y: 0, width: sliderCircleSize, height: sliderCircleSize)
         sliderCircleView.layer.position = CGPoint(x: 0, y: self.bounds.midY)
         sliderCircleView.layer.anchorPoint = CGPoint(x: 0, y: 0.5)
-        sliderCircleView.layer.backgroundColor = UIColor.white.cgColor
-        sliderCircleView.layer.cornerRadius = sliderCircleWidth / 2.0
+        sliderCircleView.backgroundColor = sliderCircleColor
+        if sliderCircleView.image == nil {
+            sliderCircleView.layer.cornerRadius = sliderCircleSize / 2.0
+        }
         sliderCircleView.layer.shadowColor = UIColor.gray.cgColor
         sliderCircleView.layer.shadowOffset = CGSize(width: 1, height: 1)
         sliderCircleView.layer.shadowOpacity = 1
@@ -171,6 +201,10 @@ public class FXSlider: UIControl {
     override public func layoutSubviews() {
         super.layoutSubviews()
         
+        sliderCircleView.frame.size = CGSize(width: sliderCircleSize, height: sliderCircleSize)
+        if sliderCircleView.image == nil {
+            sliderCircleView.layer.cornerRadius = sliderCircleSize / 2.0
+        }
         sliderCircleView.layer.position.y = self.bounds.midY
         
         trackLayer.backgroundColor = UIColor.clear.cgColor
@@ -265,10 +299,10 @@ public class FXSlider: UIControl {
             return true
         }else {
             for (i ,trackCircle) in trackCirclesArray.enumerated() {
-                let rect = CGRect(x: trackCircle.frame.origin.x - ((sliderCircleWidth / 2.0) - (trackCircleWidth / 2.0)) ,
-                                  y: trackCircle.frame.origin.y - ((sliderCircleWidth / 2.0) - (trackCircleWidth / 2.0)),
-                                  width: trackCircle.frame.size.width + (sliderCircleWidth - trackCircleWidth),
-                                  height: trackCircle.frame.size.height + ((sliderCircleWidth - trackCircleWidth)))
+                let rect = CGRect(x: trackCircle.frame.origin.x - ((sliderCircleSize / 2.0) - (trackCircleWidth / 2.0)) ,
+                                  y: trackCircle.frame.origin.y - ((sliderCircleSize / 2.0) - (trackCircleWidth / 2.0)),
+                                  width: trackCircle.frame.size.width + (sliderCircleSize - trackCircleWidth),
+                                  height: trackCircle.frame.size.height + ((sliderCircleSize - trackCircleWidth)))
                 if rect.contains(startTouchPosition) {
                     self.realValue = Double(i)/Double(trackCirclesArray.count - 1)
                     self.sendActions(for: .valueChanged)
