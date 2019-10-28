@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="FXSliderDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="giZ-fJ-5uD"/>
+                        <viewControllerLayoutGuide type="bottom" id="MAl-FC-nFn"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mb8-mE-AQ9" customClass="FXSlider" customModule="FXSlider">
+                                <rect key="frame" x="40" y="433" width="334" height="30"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="Ach-80-TwY"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="selectedTrackColor">
+                                        <color key="value" red="1" green="0.31372549020000001" blue="0.25098039220000001" alpha="1" colorSpace="calibratedRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="maximumValue">
+                                        <real key="value" value="20"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="value">
+                                        <real key="value" value="2"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="sliderValueChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="8tc-Om-Mgp"/>
+                                </connections>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SRv-jQ-Fdj">
+                                <rect key="frame" x="40" y="508" width="62" height="30"/>
+                                <state key="normal" title="测试按钮"/>
+                                <connections>
+                                    <action selector="testButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yQp-tp-uJ0"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="SRv-jQ-Fdj" firstAttribute="top" secondItem="mb8-mE-AQ9" secondAttribute="bottom" constant="45" id="CAf-61-KeC"/>
+                            <constraint firstItem="mb8-mE-AQ9" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="LJG-fR-EA0"/>
+                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="SRv-jQ-Fdj" secondAttribute="trailing" constant="20" symbolic="YES" id="OSl-dd-GoV"/>
+                            <constraint firstItem="SRv-jQ-Fdj" firstAttribute="leading" secondItem="mb8-mE-AQ9" secondAttribute="leading" id="fwb-Jw-jCe"/>
+                            <constraint firstItem="mb8-mE-AQ9" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="iOW-ZN-qO0"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="mb8-mE-AQ9" secondAttribute="trailing" constant="20" id="mAf-2k-Ju5"/>
+                            <constraint firstItem="mb8-mE-AQ9" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="vap-xV-4hd"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="slider" destination="mb8-mE-AQ9" id="Zbu-u7-P0a"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="132" y="133"/>
+        </scene>
+    </scenes>
+</document>
